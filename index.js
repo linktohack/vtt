@@ -5,6 +5,8 @@ const fetch = require('node-fetch');
 const srt2vtt = require('srt-to-vtt')
 const ass2vtt = require('ass-to-vtt')
 
+const abab = require('abab')
+
 app.use(cors())
 
 app.get('/', function (req, res) {
@@ -12,42 +14,55 @@ app.get('/', function (req, res) {
              '\t/srt/:hash',
              '\t/ass/:hash',
              '\t/vtt/:hash',
-             'where `:hash` is `encodeURIComponent(url)`'].join('\n'))
+             'where `:hash` is `btoa(url)`'].join('\n'))
 })
 
 app.get('/srt/:hash', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = decodeURIComponent(req.params.hash)
+    const url = abab.atob(req.params.hash)
+    if (typeof url !== 'string') {
+        res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
+        return
+    }
+    console.log('url', url)
     fetch(url)
         .then(res2 => {
             res2.body.pipe(srt2vtt()).pipe(res)
         })
         .catch(e => {
-            res.end('WEBTT FILE\n')
+            res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: ${e && e.message || 'unknown'}`)
         })
 })
 
 app.get('/ass/:hash', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = decodeURIComponent(req.params.hash)
+    const url = abab.atob(req.params.hash)
+    if (typeof url !== 'string') {
+        res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
+        return
+    }
     fetch(url)
         .then(res2 => {
             res2.body.pipe(ass2vtt()).pipe(res)
         })
         .catch(e => {
-            res.end('WEBTT FILE\n')
+            res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: ${e && e.message || 'unknown'}`)
         })
 })
 
 app.get('/vtt/:hash', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = decodeURIComponent(req.params.hash)
+    const url = abab.atob(req.params.hash)
+    if (typeof url !== 'string') {
+        res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
+        return
+    }
     fetch(url)
         .then(res2 => {
             res2.body.pipe.pipe(res)
         })
         .catch(e => {
-            res.end('WEBTT FILE\n')
+            res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: ${e && e.message || 'unknown'}`)
         })
 })
 
