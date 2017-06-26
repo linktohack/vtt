@@ -14,7 +14,8 @@ app.get('/', function (req, res) {
              '\t/srt/:hash',
              '\t/ass/:hash',
              '\t/vtt/:hash',
-             'where `:hash` is `btoa(url)`'].join('\n'))
+             'where `:hash` is `btoa(url)`',
+             'https://github.com/linktohack/vtt'].join('\n'))
 })
 
 app.get('/srt/:hash', function (req, res) {
