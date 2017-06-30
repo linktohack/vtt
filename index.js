@@ -5,28 +5,32 @@ const fetch = require('node-fetch');
 const srt2vtt = require('srt-to-vtt')
 const ass2vtt = require('ass-to-vtt')
 
-const abab = require('abab')
+const abab = require('abab');
+const https = require('https');
+const agent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 app.use(cors())
 
 app.get('/', function (req, res) {
     res.end(['Convert and set the correct vtt mime type for srt and ass (and vtt)',
-             '\t/srt/:hash',
-             '\t/ass/:hash',
-             '\t/vtt/:hash',
+             '\t/srt?hash=:hash',
+             '\t/ass?hash=:hash',
+             '\t/vtt?hash=:hash',
              'where `:hash` is `btoa(url)`',
              'https://github.com/linktohack/vtt'].join('\n'))
 })
 
-app.get('/srt/:hash', function (req, res) {
+app.get('/srt', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = abab.atob(req.params.hash)
+    const url = abab.atob(req.query.hash)
     if (typeof url !== 'string') {
         res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
         return
     }
     console.log('url', url)
-    fetch(url)
+    fetch(url, { agent })
         .then(res2 => {
             res2.body.pipe(srt2vtt()).pipe(res)
         })
@@ -35,14 +39,14 @@ app.get('/srt/:hash', function (req, res) {
         })
 })
 
-app.get('/ass/:hash', function (req, res) {
+app.get('/ass', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = abab.atob(req.params.hash)
+    const url = abab.atob(req.query.hash)
     if (typeof url !== 'string') {
         res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
         return
     }
-    fetch(url)
+    fetch(url, { agent })
         .then(res2 => {
             res2.body.pipe(ass2vtt()).pipe(res)
         })
@@ -51,14 +55,14 @@ app.get('/ass/:hash', function (req, res) {
         })
 })
 
-app.get('/vtt/:hash', function (req, res) {
+app.get('/vtt', function (req, res) {
     res.setHeader('Content-Type', 'text/vtt')
-    const url = abab.atob(req.params.hash)
+    const url = abab.atob(req.query.hash)
     if (typeof url !== 'string') {
         res.end(`WEBTT FILE\n\n1\n0 --> 10\nError: invalid url}`)
         return
     }
-    fetch(url)
+    fetch(url, { agent })
         .then(res2 => {
             res2.body.pipe.pipe(res)
         })
